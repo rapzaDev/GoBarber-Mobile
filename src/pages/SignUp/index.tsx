@@ -45,6 +45,7 @@ const SignUp: React.FC = () => {
         <ScrollView
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ flex: 1 }}
+          style={{ flex: 1 }}
         >
           <Container>
             <Image source={logoImg} />
@@ -53,7 +54,11 @@ const SignUp: React.FC = () => {
               <Title>Create your account</Title>
             </View>
 
-            <Form ref={formRef} onSubmit={handleSignUp}>
+            <Form
+              ref={formRef}
+              onSubmit={handleSignUp}
+              style={{ width: '100%' }}
+            >
               <Input
                 autoCapitalize="words"
                 name="name "

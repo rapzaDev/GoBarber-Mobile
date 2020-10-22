@@ -6,7 +6,7 @@ import { getBottomSpace } from 'react-native-iphone-x-helper';
 export const Container = styled.View`
   flex: 1;
   justify-content: center;
-  padding: 0 30px ${Platform.OS === 'android' ? 140 : 40}px;
+  padding: 0 30px ${Platform.OS === 'android' ? 100 : 40}px;
   align-items: center;
 `;
 
