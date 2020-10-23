@@ -13,6 +13,8 @@ import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 
+import api from '../../services/api';
+
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import Input from '../../components/Input';
@@ -41,40 +43,50 @@ const SignUp: React.FC = () => {
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback(async (data: SingUpFormData) => {
-    try {
-      formRef.current?.setErrors({});
+  const handleSignUp = useCallback(
+    async (data: SingUpFormData) => {
+      try {
+        formRef.current?.setErrors({});
 
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Name required'),
-        email: Yup.string()
-          .required('E-mail required')
-          .email('Enter a valid e-mail'),
-        password: Yup.string().min(6, 'At least 6 digits'),
-      });
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Name required'),
+          email: Yup.string()
+            .required('E-mail required')
+            .email('Enter a valid e-mail'),
+          password: Yup.string().min(6, 'At least 6 digits'),
+        });
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      // await api.post('/users', data);
+        await api.post('/users', data);
 
-      // history.push('/');
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
+        Alert.alert(
+          'Your account has been created!',
+          'You can now log on GoBarber!',
+        );
 
-        formRef.current?.setErrors(errors);
+        navigation.goBack();
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
 
-        return;
+          formRef.current?.setErrors(errors);
+
+          return;
+        }
+
+        console.log(err);
+
+        Alert.alert(
+          'Register Error',
+          'An error occurred on account registration, try again.',
+        );
       }
-
-      Alert.alert(
-        'Register Error',
-        'An error occurred on account registration, try again.',
-      );
-    }
-  }, []);
+    },
+    [navigation],
+  );
 
   return (
     <>
