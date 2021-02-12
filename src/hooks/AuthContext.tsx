@@ -61,6 +61,8 @@ const AuthProvider: React.FC = ({ children }) => {
     ]);
 
     setData({ user, token });
+
+    console.log(data.user);
   }, []);
 
   const signOut = useCallback(async () => {
