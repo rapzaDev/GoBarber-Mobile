@@ -48,7 +48,8 @@
         }
       ],
       "prettier/prettier": "error",
-      "camelcase": "off"
+      "camelcase": "off",
+      "import/no-duplicates": "off"
     },
     "settings": {
       "import/resolver": {
