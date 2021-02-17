@@ -31,14 +31,16 @@ import {
 import logoImg from '../../assets/logo.png';
 import { useAuth } from '../../hooks/AuthContext';
 
-interface SingUpFormData {
+interface ProfileFormData {
   name: string;
   email: string;
+  old_password: string;
   password: string;
+  password_confirmation: string;
 }
 
-const SignUp: React.FC = () => {
-  const { user } = useAuth();
+const Profile: React.FC = () => {
+  const { user, updateUser } = useAuth();
 
   const formRef = useRef<FormHandles>(null);
   const navigation = useNavigation();
@@ -48,8 +50,8 @@ const SignUp: React.FC = () => {
   const passwordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback(
-    async (data: SingUpFormData) => {
+  const handleProfile = useCallback(
+    async (data: ProfileFormData) => {
       try {
         formRef.current?.setErrors({});
 
@@ -58,19 +60,50 @@ const SignUp: React.FC = () => {
           email: Yup.string()
             .required('E-mail required')
             .email('Enter a valid e-mail'),
-          password: Yup.string().min(6, 'At least 6 digits'),
+          old_password: Yup.string(),
+          password: Yup.string().when('old_password', {
+            is: val => !!val.length,
+            then: Yup.string().required('Field required'),
+            otherwise: Yup.string(),
+          }),
+          password_confirmation: Yup.string()
+            .when('old_password', {
+              is: val => !!val.length,
+              then: Yup.string().required('Field required'),
+              otherwise: Yup.string(),
+            })
+            .oneOf([Yup.ref('password'), undefined], 'Passwords must match'),
         });
 
         await schema.validate(data, {
           abortEarly: false,
         });
 
-        await api.post('/users', data);
+        const {
+          name,
+          email,
+          password,
+          old_password,
+          password_confirmation,
+        } = data;
 
-        Alert.alert(
-          'Your account has been created!',
-          'You can now log on GoBarber!',
-        );
+        const formData = {
+          name,
+          email,
+          ...(old_password
+            ? {
+                old_password,
+                password,
+                password_confirmation,
+              }
+            : {}),
+        };
+
+        const response = await api.put('/profile', formData);
+
+        updateUser(response.data);
+
+        Alert.alert('Your profile has been updated!');
 
         navigation.goBack();
       } catch (err) {
@@ -82,11 +115,9 @@ const SignUp: React.FC = () => {
           return;
         }
 
-        console.log(err);
-
         Alert.alert(
-          'Register Error',
-          'An error occurred on account registration, try again.',
+          'Update Profile Error',
+          'An error occurred on profile update process, try again',
         );
       }
     },
@@ -123,8 +154,9 @@ const SignUp: React.FC = () => {
             </View>
 
             <Form
+              initialData={user}
               ref={formRef}
-              onSubmit={handleSignUp}
+              onSubmit={handleProfile}
               style={{ width: '100%' }}
             >
               <Input
@@ -207,4 +239,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default Profile;
